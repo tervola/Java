@@ -1,0 +1,257 @@
+import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Properties;
+
+/**
+ * Created by user on 10.09.2014.
+ */
+public class Prop
+{
+    static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+
+    private static String filename = "d:\\temp\\config.txt";
+    private static ArrayList<String> keys = new ArrayList<String>();
+    private static ArrayList<String> values = new ArrayList<String>();
+    private static int choice;
+    private static String config;
+    private static boolean isAlreadyReadconfig = false;
+
+
+    public static void main(String[] args) throws IOException
+    {
+
+        while (true)
+        {
+
+            System.out.println("\n1 - load a config file.\n2 - show a config.\n3 - show value from key.\n4 - edit value for key.\n5 - add property to config file.\n6 - delete pair.\n7 - save changes.\n8 - quit.");
+            System.out.println("Input number(1-8):");
+            try{
+                choice = Integer.parseInt(reader.readLine());
+                if(choice == 1)
+                {
+                    config = readConfig();
+                    if (config != null && !isAlreadyReadconfig)
+                    {
+                        System.out.println("\nConfig file loaded.");
+                        parseConfig();
+                        isAlreadyReadconfig = true;
+                    }
+                    else
+                        System.out.println("\nConfig file already loaded!");
+                }
+                else if(choice == 2)
+                {
+                    if (config != null)
+                        showConfig();
+                    else
+                        loadError();
+                }
+                else if(choice == 3)
+                {
+                    if (config != null)
+                        showValue();
+                    else
+                        loadError();
+                }
+                else if(choice == 4)
+                {
+                    if (config != null)
+                        editValue();
+                    else
+                        loadError();
+                }
+                else if(choice == 5)
+                {
+                    if (config != null)
+                        addProperty();
+                    else
+                        loadError();
+                }
+                else if(choice == 6){
+                    if (config != null)
+                    {
+                        System.out.println("Delete pair by key:");
+                        deletePair(reader.readLine());
+                    }
+                    else
+                    {
+                        loadError();
+                    }
+                }
+                else if(choice == 7) {
+                    if (config != null)
+                    {
+                        saveConfig();
+                    }
+                    else
+                    {
+                        loadError();
+                    }
+                }
+                else if(choice == 8) {
+                    break;
+                }
+            }catch (NumberFormatException e1){
+                System.out.println("Wrong number! Try again.");
+            }
+        }
+    }
+
+    private static void addProperty() throws IOException{
+        System.out.print("Input key:");
+        String newKey = reader.readLine();
+        System.out.print("Input value:");
+        String newValue = reader.readLine();
+
+        if (keys.size() == values.size())
+        {
+            try
+            {
+                keys.add(newKey);
+                values.add(newValue);
+                config += "\n" + newKey + "=" + newValue;
+                if (keys.size() != values.size())
+                    System.out.println("Something wrong, try again later!");
+            }
+            catch (Exception e)
+            {
+                System.out.println("Something wrong, try again!");
+            }
+        }
+    }
+
+    private static String readConfig() throws IOException{
+        FileReader fileReader = new FileReader(filename);
+        String string = "";
+        while (fileReader.ready())
+        {
+            string +=(char) fileReader.read();
+        }
+
+        fileReader.close();
+
+        return string;
+    }
+
+    private static void saveConfig() throws IOException{
+
+        FileWriter fileWriter = new FileWriter(filename);
+        String newContent = "";
+        for (int i = 0; i < keys.size(); i++)
+        {
+            if (!keys.get(i).isEmpty())
+            {
+
+                newContent +=keys.get(i) + "=" + values.get(i)+"\r\n";
+            }
+            else
+            {
+                newContent += "\r\n";
+            }
+
+        }
+        fileWriter.write(newContent);
+        fileWriter.close();
+
+    }
+
+    private static void parseConfig() throws IOException{
+        String[] prop = readConfig().split("\r\n");
+
+        for (String substring : prop)
+        {
+            if (substring.contains("="))
+            {
+                String[] parser = substring.split("=");
+                keys.add(parser[0]);
+                values.add(parser[1]);
+            }
+            else
+            {
+                keys.add("");
+                values.add("");
+            }
+        }
+    }
+
+    private static void showConfig(){
+        System.out.println("\n***Showing config***");
+        for (int i = 0; i <keys.size() ; i++)
+        {
+            if(!keys.get(i).isEmpty())
+                System.out.println(keys.get(i)+"="+values.get(i));
+            else
+                System.out.println("");
+        }
+        System.out.println("\n***End config***");
+        System.out.println("");
+    }
+
+    private static void showValue() throws IOException{
+        System.out.println("Input key: ");
+        String key = reader.readLine().toLowerCase();
+        boolean isFound = false;
+
+        for (int i = 0; i < keys.size(); i++)
+        {
+            if (keys.get(i).toLowerCase().contains(key))
+            {
+                System.out.println("\r\n" + keys.get(i) + "=" +  values.get(i));
+                isFound = true;
+            }
+        }
+        if(!isFound)
+            System.out.println("Key hasn't found. Try again");
+    }
+
+    private static void editValue() throws IOException{
+
+        while (true)
+        {
+            System.out.println("Input key: ");
+            String key = reader.readLine().toLowerCase();
+            System.out.println("New value: ");
+            String value = reader.readLine();
+
+            boolean isFound = false;
+            String exit = null;
+
+            for (int i = 0; i < keys.size(); i++)
+            {
+                if (keys.get(i).equals(key))
+                {
+                    values.set(i, value);
+                    System.out.println("New parameter:");
+                    System.out.println(keys.get(i)+"="+values.get(i));
+                    isFound = true;
+                }
+            }
+            if(!isFound)
+                System.out.println("Key hasn't found. Try again");
+            System.out.println("For return to main menu press \"q\". Press \"Enter\" to continue ");
+            if (reader.readLine().equals("q"))
+                break;
+        }
+    }
+
+    private static void deletePair(String key){
+        for (int i = 0; i < keys.size(); i++)
+        {
+            if (keys.get(i).trim().equals(key))
+            {
+                System.out.println(keys.get(i) + "=" +  values.get(i) + " has removed!");
+                keys.remove(i);
+                values.remove(i);
+
+            }
+        }
+    }
+
+    private static void loadError(){
+        System.out.println("\nError! File hasn't loaded. First load config file.");
+
+    }
+
+}

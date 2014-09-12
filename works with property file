@@ -6,6 +6,13 @@ import java.util.Properties;
 
 /**
  * Created by user on 10.09.2014.
+ uploads and works content from properties file like "key=value"
+ program can:
+    show properties
+    add property
+    remove property
+    find value by key
+    change value for key
  */
 public class Prop
 {

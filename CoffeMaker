@@ -1,0 +1,11 @@
+public class CoffeMaker
+{
+    public static void main(String[] args)
+    {
+        Drink tea = new Tea();
+        Drink latte = new Latte();
+        Drink americano = new Americano();
+        tea.makeDrink();
+        latte.makeDrink();
+        americano.makeDrink();
+    }
